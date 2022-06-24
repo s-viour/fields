@@ -1,9 +1,9 @@
 import os
+import sys
 import json
 from functools import partial
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from discord.ext import commands
-from server import keep_alive
 
 
 def read_config():
@@ -20,6 +20,7 @@ def read_config():
     except json.JSONDecodeError as e:
         print(f'config file not found: {e}')
 
+
 def loop_audio(path, connection, e=None):
     audio = PCMVolumeTransformer(FFmpegPCMAudio(path))
     cb = partial(loop_audio, path, connection)
@@ -27,6 +28,7 @@ def loop_audio(path, connection, e=None):
 
 
 bot = commands.Bot(command_prefix='$')
+
 
 @bot.event
 async def on_ready():
@@ -46,10 +48,21 @@ async def on_ready():
         loop_audio(audio_path, c)
 
 
-if os.getenv('BOT_TOKEN'):
-    # convince repl to let us keep running
-    keep_alive()
+def main():
+    enable_server = False
+    if len(sys.argv) > 0:
+        enable_server = sys.argv[0] == '--server'
+    
+    token = os.getenv('BOT_TOKEN')
+    if token is None:
+        print('no token supplied\nmust be set to environment variable BOT_TOKEN', file=sys.stderr)
+        return
+
+    if enable_server:
+        from server import keep_alive
+        keep_alive()
     bot.config = read_config()
-    bot.run(os.environ['BOT_TOKEN'])
-else:
-    print('no token supplied\nmust be set to environment variable BOT_TOKEN')
+    bot.run(token)
+
+if __name__ == '__main__':
+    main()
