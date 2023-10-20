@@ -1,18 +1,24 @@
-[tool.poetry]
+[project]
 name = "fields"
-version = "0.1.0"
-description = ""
-authors = ["matt wyatt"]
+version = "1.0.0"
+description = "ambient noise discord bot"
+authors = [
+    {name = "matt wyatt", email = "mwyatt1000@gmail.com"},
+]
+dependencies = [
+    "discord-py>=2.3.2",
+    "pynacl>=1.5.0",
+    "python-dotenv>=1.0.0",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
 
-[tool.poetry.dependencies]
-python = "^3.8"
-discord = "^1.0.1"
-PyNaCl = "^1.4.0"
-Flask = "^1.1.2"
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.10.0",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.pdm.scripts]
+start = "python src/fields"
+fmt = "black src/fields"
