@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import logging
 from bot import Fields
 from dotenv import load_dotenv
 import discord
@@ -15,7 +16,7 @@ def main():
         return
 
     try:
-        cfg = read_config()
+        cfg = _read_config()
     except KeyError as e:
         print(f"invalid config: {e}", file=sys.stderr)
         return
@@ -32,8 +33,7 @@ def main():
     )
     client.run(token)
 
-
-def read_config():
+def _read_config():
     with open("config.json") as f:
         j = json.load(f)
         if "channelIDs" not in j or "audioPath" not in j:
@@ -44,6 +44,18 @@ def read_config():
             raise KeyError("missing key `volume`")
         return j
 
+def _setup_logging(debug=False):
+    """sets up the fields logger"""
+    level = logging.DEBUG if debug else logging.INFO
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s")
+    ch.setFormatter(formatter)
+    log = logging.getLogger()
+    log.setLevel(level)
+    log.addHandler(ch)
 
 if __name__ == "__main__":
+    debug = "--debug" in sys.argv or "-d" in sys.argv
+    _setup_logging(debug)
     main()
+
