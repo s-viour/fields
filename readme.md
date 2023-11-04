@@ -13,3 +13,7 @@ to run the bot, a PDM script is provided: `pdm run start`. if you are not using 
 * `audioPath` - absolute or relative path to the audio file to play
 * `channelIDs` - list of numerical channel IDs to join and play audio
 * `volume` - percentage volume to play audio at. see [this](https://discordpy.readthedocs.io/en/stable/api.html?highlight=ffmpegpcmaudio#discord.PCMVolumeTransformer.volume) section in the discord.py docs for how volume works.
+
+# contributing
+contributions are welcome, just make a PR! i'm sure the code can be improved largely beyond what it is now.
+
