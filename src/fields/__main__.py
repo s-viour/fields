@@ -8,6 +8,7 @@ import discord
 
 log = logging.getLogger("fields.main")
 
+
 def main():
     """parses the config and environment, then starts the bot"""
     load_dotenv()
@@ -37,6 +38,7 @@ def main():
     # to give the logger its own config
     client.run(token, log_handler=None)
 
+
 def _read_config():
     """read and validates the `config.json` file. assumes that the file exists.
     if the file does not exist, `open` will throw a `FileNotFoundError`
@@ -51,6 +53,7 @@ def _read_config():
             raise KeyError("missing key `volume`")
         return j
 
+
 def _setup_logging(debug=False):
     """sets up the fields logger"""
     level = logging.DEBUG if debug else logging.INFO
@@ -58,8 +61,8 @@ def _setup_logging(debug=False):
     ch = logging.StreamHandler()
     logging.basicConfig(format=log_format, handlers=[ch], level=level)
 
+
 if __name__ == "__main__":
     debug = "--debug" in sys.argv or "-d" in sys.argv
     _setup_logging(debug)
     main()
-
