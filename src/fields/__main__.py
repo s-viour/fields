@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import logging
-from bot import Fields
+from .bot import Fields
 from dotenv import load_dotenv
 import discord
 
@@ -15,7 +15,7 @@ def main():
 
     token = os.getenv("BOT_TOKEN")
     if token is None:
-        log.debug("missing `BOT_TOKEN` environment variable", file=sys.stderr)
+        log.warning("missing `BOT_TOKEN` environment variable")
         return
 
     try:
