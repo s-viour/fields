@@ -37,7 +37,10 @@ def main():
         channel_ids=cfg["channelIDs"],
         audio_path=cfg["audioPath"],
         volume=cfg["volume"],
+        mode=cfg["mode"],
+        chance=cfg["chance"]
     )
+
     # we disable the log_handler here to allow our _setup_logging function
     # to give the logger its own config
     client.run(token, log_handler=None)
@@ -63,10 +66,22 @@ def _read_config(filename):
         j = json.load(f)
         if "channelIDs" not in j or "audioPath" not in j:
             raise KeyError("missing key `channelIDs`")
-        elif "audioPath" not in j:
+        if "audioPath" not in j:
             raise KeyError("missing key `audioPath`")
-        elif "volume" not in j:
+        if "volume" not in j:
             raise KeyError("missing key `volume`")
+        if "mode" not in j:
+            raise KeyError("missing key `mode`")
+
+        
+        if j["mode"] == "random" and "chance" not in j:
+            raise KeyError("'random' mode requires `chance` to be specified")
+        elif j["mode"] == "loop":
+            j["chance"] = None
+        
+        if j["mode"] != "loop" and j["mode"] != "random":
+            raise KeyError("key `mode` must be 'loop' or 'random'")
+        
         return j
 
 

@@ -2,6 +2,7 @@ import logging
 from functools import partial
 import asyncio
 import discord
+import random
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 
 
@@ -12,12 +13,15 @@ class Fields(discord.Client):
     """class implementing the single-bot fields functionality"""
 
     def __init__(
-        self, channel_ids, audio_path, volume, check_timeout=60, *args, **kwargs
+        self, channel_ids, audio_path, volume, check_timeout=60, mode="loop", chance=1, *args, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.channel_ids = channel_ids
         self.audio_path = audio_path
         self.volume = volume
+        self.mode = mode
+        self.chance = chance
+        self.channels = []
         self.conns = []
         self.check_timeout = check_timeout
 
@@ -30,6 +34,22 @@ class Fields(discord.Client):
             volume=self.volume,
         )
         connection.play(source=audio)
+
+    async def play_audio(self, connection):
+        """play audio by itself. used by the `manage_connections` coroutine for
+        the random mode
+        """
+
+        log.info(f"playing audio on connection: {connection.channel}")
+        audio = PCMVolumeTransformer(
+            FFmpegPCMAudio(self.audio_path),
+            volume=self.volume
+        )
+        connection.play(source=audio)
+        while True:
+            if not connection.is_playing():
+                return
+            await asyncio.sleep(1)
 
     async def manage_connections(self):
         """coroutine that runs forever on the discord event loop.
@@ -55,14 +75,30 @@ class Fields(discord.Client):
 
             await asyncio.sleep(5)
 
-    def is_all_connected(self):
-        """checks whether or not all `VoiceClient`s in `self.conns` are connected
-        to a voice channel
+    async def manage_random(self):
+        """connection manager for the random mode
         """
-        conn_status = list(map(lambda c: c.is_connected(), self.conns))
-        if conn_status == []:
-            return True
-        return all(conn_status)
+        while True:
+            if not roll_chance(self.chance):
+                await asyncio.sleep(5)
+                continue
+
+            await self.join_all_channels()
+            for c in self.conns:
+                await self.play_audio(c)
+                await c.disconnect()
+
+            await asyncio.sleep(5)
+
+    async def join_all_channels(self):
+        """clears the channels and conns list, then connects to all of them
+        """
+        self.channels.clear()
+        self.conns.clear()
+
+        self.channels = list(map(self.get_channel, self.channel_ids))
+        for c in self.channels:
+            self.conns.append(await c.connect())
 
     async def on_ready(self):
         """function that runs when the bot starts. will create all connections and begin
@@ -72,13 +108,11 @@ class Fields(discord.Client):
             log.error("no channels supplied! quitting...")
             await self.close()
 
-        self.channels = map(self.get_channel, self.channel_ids)
-        for c in self.channels:
-            self.conns.append(await c.connect())
-
-        # add the connection manager to the event loop
-        # this will periodically run every 5s
-        self.loop.create_task(self.manage_connections())
+        if self.mode == "loop":
+            await self.join_all_channels()
+            self.loop.create_task(self.manage_connections())
+        else:
+            self.loop.create_task(self.manage_random())
 
     async def on_voice_state_update(self, member, before, after):
         """implemented specifically to restart the audio streams when the
@@ -100,3 +134,7 @@ class Fields(discord.Client):
             return
 
         conn.stop()
+
+
+def roll_chance(chance):
+    return random.random() <= chance

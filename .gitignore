@@ -225,3 +225,5 @@ fabric.properties
 # pyright stuff
 pyrightconfig.json
 
+# nix stuff
+.direnv

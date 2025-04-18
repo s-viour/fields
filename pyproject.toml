@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "ambient noise discord bot"
 authors = [{ name = "matt wyatt", email = "mwyatt1000@gmail.com" }]
 dependencies = ["discord-py>=2.3.2", "pynacl>=1.5.0", "python-dotenv>=1.0.0"]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 readme = "README.md"
 license = { text = "MIT" }
 

@@ -1,5 +1,7 @@
 {
     "audioPath": "audio/wind.mp3",
     "channelIDs": [],
-    "volume": 1.0
+    "volume": 1.0,
+    "mode": "random",
+    "chance": 0.5
 }
